@@ -3,113 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LAMONIÊ CINE | OFICIAL</title>
+    <title>IMDb | Lamoniê Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --imdb: #f5c518; --bg: #0a0a0a; --card: #1a1a1a; }
-        body { background: var(--bg); color: white; font-family: -apple-system, system-ui, sans-serif; margin: 0; padding-top: 150px; }
-        
-        header { 
-            background: #000; padding: 20px 5%; border-bottom: 1px solid #333; 
-            position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;
+        /* ESTILO OFICIAL IMDB */
+        :root { 
+            --imdb-yellow: #f5c518; 
+            --imdb-black: #000000;
+            --imdb-dark-gray: #121212;
+            --imdb-card-bg: #1a1a1a;
+            --text-gray: #a1a1a1;
         }
-        .logo { color: var(--imdb); font-size: 24px; font-weight: 900; border: 2px solid var(--imdb); padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 15px; }
-        
-        .search-container { display: flex; gap: 10px; background: #222; padding: 12px; border-radius: 12px; border: 1px solid #444; }
-        .search-container input { background: none; border: none; color: white; flex: 1; outline: none; font-size: 16px; }
-        .search-container i { color: var(--imdb); font-size: 20px; }
 
-        .container { padding: 0 5%; }
-        .movie-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        body { 
+            background: var(--imdb-black); 
+            color: white; 
+            font-family: 'Roboto', -apple-system, sans-serif; 
+            margin: 0; 
+            padding-top: 140px; 
+        }
         
-        .movie-card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #333; }
-        /* Forçando a exibição da imagem */
-        .movie-card img { width: 100%; height: 250px; object-fit: cover; display: block; background: #222; }
-        .movie-info { padding: 12px; }
-        .movie-info b { font-size: 14px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .rating { color: var(--imdb); font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        /* Header Superior */
+        header { 
+            background: var(--imdb-dark-gray); 
+            padding: 15px 5%; 
+            border-bottom: 1px solid #333; 
+            position: fixed; 
+            top: 0; 
+            width: 100%; 
+            z-index: 1000; 
+            box-sizing: border-box;
+        }
+
+        .logo-imdb { 
+            background: var(--imdb-yellow); 
+            color: black; 
+            font-size: 22px; 
+            font-weight: 900; 
+            padding: 2px 10px; 
+            border-radius: 4px; 
+            display: inline-block; 
+            margin-bottom: 12px;
+            font-family: 'Impact', sans-serif;
+        }
+
+        /* Barra de Busca Estilo IMDb */
+        .search-bar { 
+            display: flex; 
+            gap: 10px; 
+            background: white; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            align-items: center; 
+        }
+        .search-bar input { 
+            background: none; 
+            border: none; 
+            color: black; 
+            flex: 1; 
+            outline: none; 
+            font-size: 16px; 
+            font-weight: 500;
+        }
+        .search-bar i { color: #555; font-size: 18px; cursor: pointer; }
+        .search-bar i.fa-microphone { color: #333; border-left: 1px solid #ccc; padding-left: 10px; }
+
+        /* Grade de Filmes */
+        .container { padding: 0 4% 40px; }
+        .movie-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            gap: 12px; 
+        }
+
+        .movie-card { 
+            background: var(--imdb-card-bg); 
+            border-radius: 0 0 8px 8px; 
+            overflow: hidden; 
+            transition: 0.3s; 
+            cursor: pointer;
+            border: 1px solid #222;
+        }
+        .movie-card img { 
+            width: 100%; 
+            height: 240px; 
+            object-fit: cover; 
+            display: block; 
+        }
+        .movie-info { padding: 10px; }
+        .rating-star { color: var(--imdb-yellow); font-size: 14px; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 4px; }
+        .movie-title { font-size: 14px; font-weight: 500; height: 34px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; }
+
+        /* MODAL DE DETALHES */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; overflow-y: auto; padding: 0; }
+        .modal-content { width: 100%; max-width: 600px; margin: 0 auto; position: relative; background: var(--imdb-dark-gray); min-height: 100vh; }
+        .close-btn { position: absolute; top: 20px; right: 20px; font-size: 35px; color: white; z-index: 10; cursor: pointer; text-shadow: 0 0 10px black; }
         
-        #status-voz { color: var(--imdb); text-align: center; font-size: 12px; margin-top: 5px; display: none; }
+        .modal-banner { width: 100%; height: 300px; object-fit: cover; }
+        .modal-body { padding: 20px; margin-top: -50px; background: var(--imdb-dark-gray); border-radius: 20px 20px 0 0; position: relative; }
+        .modal-body h2 { color: white; margin: 0 0 10px 0; font-size: 26px; }
+        .modal-meta { color: var(--text-gray); font-size: 14px; margin-bottom: 15px; display: flex; gap: 15px; }
+        .modal-sinopse { line-height: 1.6; font-size: 16px; color: #eee; border-top: 1px solid #333; padding-top: 15px; }
+        
+        .trailer-btn { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px;
+            background: var(--imdb-yellow); 
+            color: black; 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            margin-top: 25px; 
+            text-transform: uppercase;
+        }
+
+        #loading { text-align: center; color: var(--imdb-yellow); display: none; padding: 20px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">LAMONIÊ</div>
-    <div class="search-container">
+    <div class="logo-imdb">IMDb</div>
+    <div class="search-bar">
         <i class="fas fa-search"></i>
-        <input type="text" id="busca" placeholder="Fale ou digite um filme...">
-        <i class="fas fa-microphone" id="mic" onclick="ouvirVoz()"></i>
+        <input type="text" id="campoBusca" placeholder="Pesquisar filmes e séries...">
+        <i class="fas fa-microphone" onclick="ouvirVoz()"></i>
     </div>
-    <div id="status-voz">Escutando...</div>
 </header>
 
 <div class="container">
-    <div class="movie-grid" id="grid">
-        <!-- O catálogo vai aparecer aqui -->
+    <div id="loading"><i class="fas fa-circle-notch fa-spin"></i> Consultando base IMDb...</div>
+    <h3 style="border-left: 4px solid var(--imdb-yellow); padding-left: 10px; margin: 20px 0;">Filmes em Destaque</h3>
+    <div class="movie-grid" id="grid"></div>
+</div>
+
+<!-- Modal IMDb -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="fecharModal()">&times;</span>
+        <img id="m-poster" class="modal-banner">
+        <div class="modal-body">
+            <h2 id="m-titulo"></h2>
+            <div class="modal-meta">
+                <span id="m-ano"></span>
+                <span>⭐ <b id="m-nota" style="color:white"></b>/10</span>
+            </div>
+            <p class="modal-sinopse" id="m-sinopse"></p>
+            <a id="m-trailer-link" target="_blank" class="trailer-btn">
+                <i class="fas fa-play"></i> Assistir Trailer
+            </a>
+        </div>
     </div>
 </div>
 
 <script>
-    // LISTA DE FILMES COM LINKS DE IMAGENS QUE O IPHONE NÃO BLOQUEIA
-    const filmes = [
-        { t: "Coringa: Delírio a Dois", n: "7.0", i: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=500&auto=format&fit=crop" },
-        { t: "Batman: O Cavaleiro", n: "9.0", i: "https://images.unsplash.com/photo-1531259683007-016a7b628fc3?q=80&w=500&auto=format&fit=crop" },
-        { t: "Interestelar", n: "8.7", i: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=500&auto=format&fit=crop" },
-        { t: "Oppenheimer", n: "8.4", i: "https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?q=80&w=500&auto=format&fit=crop" },
-        { t: "Duna: Parte 2", n: "8.6", i: "https://images.unsplash.com/photo-1506466010722-395aa2bef877?q=80&w=500&auto=format&fit=crop" },
-        { t: "Homem-Aranha", n: "8.2", i: "https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=500&auto=format&fit=crop" }
-    ];
+    const API_KEY = '9b8344e5482386e680cf38a8e3d30906';
+    const proxy = "https://images.weserv.nl/?url=";
 
-    const grid = document.getElementById('grid');
-    const input = document.getElementById('busca');
+    async function buscarFilmes(query = '') {
+        document.getElementById('loading').style.display = 'block';
+        let url = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=pt-BR`;
+        if(query) url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
+        
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            montarGrid(data.results);
+        } catch (e) { console.error("Erro na busca"); }
+        document.getElementById('loading').style.display = 'none';
+    }
 
-    function exibir(lista) {
-        if (lista.length === 0) {
-            grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1/3;">Nenhum filme encontrado.</p>';
-            return;
-        }
-        grid.innerHTML = lista.map(f => `
-            <div class="movie-card">
-                <img src="${f.i}" alt="${f.t}">
+    function montarGrid(filmes) {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = filmes.map(f => `
+            <div class="movie-card" onclick="verDetalhes(${f.id})">
+                <img src="${proxy}https://image.tmdb.org/t/p/w342${f.poster_path}" onerror="this.src='https://via.placeholder.com/342x513?text=IMDb'">
                 <div class="movie-info">
-                    <div class="rating"><i class="fas fa-star"></i> ${f.n}</div>
-                    <b>${f.t}</b>
+                    <div class="rating-star"><i class="fas fa-star"></i> ${f.vote_average.toFixed(1)}</div>
+                    <div class="movie-title">${f.title}</div>
                 </div>
             </div>
         `).join('');
     }
 
-    // Busca em tempo real
-    input.addEventListener('input', () => {
-        const termo = input.value.toLowerCase();
-        const filtrados = filmes.filter(f => f.t.toLowerCase().includes(termo));
-        exibir(filtrados);
-    });
-
-    // Função de Microfone
-    function ouvirVoz() {
-        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Speech) {
-            alert("Seu navegador não suporta busca por voz.");
-            return;
-        }
-        const rec = new Speech();
-        rec.lang = 'pt-BR';
-        document.getElementById('status-voz').style.display = 'block';
+    async function verDetalhes(id) {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=pt-BR`);
+        const f = await res.json();
         
+        document.getElementById('m-poster').src = proxy + 'https://image.tmdb.org/t/p/w780' + (f.backdrop_path || f.poster_path);
+        document.getElementById('m-titulo').innerText = f.title;
+        document.getElementById('m-ano').innerText = f.release_date.substring(0, 4);
+        document.getElementById('m-nota').innerText = f.vote_average.toFixed(1);
+        document.getElementById('m-sinopse').innerText = f.overview || "Informações em breve.";
+        document.getElementById('m-trailer-link').href = `https://www.youtube.com/results?search_query=trailer+${encodeURIComponent(f.title)}`;
+        
+        document.getElementById('modal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModal() {
+        document.getElementById('modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Busca ao digitar
+    let debounce;
+    document.getElementById('campoBusca').oninput = (e) => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => buscarFilmes(e.target.value), 600);
+    };
+
+    // Microfone
+    function ouvirVoz() {
+        const Recon = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Recon) return alert("Voz não suportada");
+        const rec = new Recon();
+        rec.lang = 'pt-BR';
         rec.onresult = (e) => {
-            const fala = e.results[0][0].transcript;
-            input.value = fala;
-            input.dispatchEvent(new Event('input'));
-            document.getElementById('status-voz').style.display = 'none';
+            const txt = e.results[0][0].transcript;
+            document.getElementById('campoBusca').value = txt;
+            buscarFilmes(txt);
         };
-        rec.onerror = () => document.getElementById('status-voz').style.display = 'none';
         rec.start();
     }
 
-    // Início
-    exibir(filmes);
+    buscarFilmes(); // Início automático
 </script>
 
 </body>
