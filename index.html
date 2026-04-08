@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LAMONIÊ CINE | OFICIAL</title>
+    <title>LAMONIÊ CINE | ULTRA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --imdb: #f5c518; --bg: #0a0a0a; }
@@ -23,7 +23,8 @@
         .movie-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         
         .movie-card { background: #1a1a1a; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
-        .movie-card img { width: 100%; height: 250px; object-fit: cover; background: #222; }
+        /* Ajuste para a imagem carregar melhor no iPhone */
+        .movie-card img { width: 100%; min-height: 230px; object-fit: cover; background: #222; display: block; }
         .movie-info { padding: 12px; }
         .movie-info b { font-size: 14px; display: block; height: 35px; overflow: hidden; }
         .rating { color: var(--imdb); font-weight: bold; margin-bottom: 5px; font-size: 14px; }
@@ -37,29 +38,29 @@
     <div class="logo">LAMONIÊ</div>
     <div class="search-container">
         <i class="fas fa-search"></i>
-        <input type="text" id="busca" placeholder="Fale ou digite um filme...">
+        <input type="text" id="busca" placeholder="Fale ou digite...">
         <i class="fas fa-microphone" id="mic" onclick="ouvirVoz()"></i>
     </div>
     <div id="status-voz">Escutando...</div>
 </header>
 
 <div class="container">
-    <div class="movie-grid" id="grid">
-        <!-- Catálogo renderizado pelo JS -->
-    </div>
+    <div class="movie-grid" id="grid"></div>
 </div>
 
 <script>
-    // CATÁLOGO ROBUSTO INTEGRADO (Sem depender de API externa para carregar)
+    // Mudei o servidor de imagens para um que o iPhone não bloqueia (estilo Google Images)
+    const imgBase = "https://images.weserv.nl/?url=https://image.tmdb.org/t/p/w342";
+
     const filmes = [
-        { t: "Deadpool & Wolverine", n: 8.9, i: "https://image.tmdb.org/t/p/w342/o99vHmmetS7YqYp8p0mI3MD99Zp.jpg" },
-        { t: "Coringa: Delírio a Dois", n: 7.0, i: "https://image.tmdb.org/t/p/w342/86pUjm9K4fW656O6D1HT6ZsiOVc.jpg" },
-        { t: "Divertida Mente 2", n: 7.8, i: "https://image.tmdb.org/t/p/w342/8Y766p37fSIsS6vNcO7X9S0U7fI.jpg" },
-        { t: "Transformers: O Início", n: 7.9, i: "https://image.tmdb.org/t/p/w342/m0M67XUjG69S838P0S58W3lY6pS.jpg" },
-        { t: "Alien: Romulus", n: 7.4, i: "https://image.tmdb.org/t/p/w342/b33S7C7uArI2YUIvUdpS0f07nsh.jpg" },
-        { t: "É Assim Que Acaba", n: 6.9, i: "https://image.tmdb.org/t/p/w342/36Y9S0U0P9pYl8vU3I1B1pYp7X6.jpg" },
-        { t: "Longlegs", n: 7.2, i: "https://image.tmdb.org/t/p/w342/v7WvfS7jU8lXW9pX6oR7k8yXU.jpg" },
-        { t: "Meu Malvado Favorito 4", n: 6.8, i: "https://image.tmdb.org/t/p/w342/3wS0SGBpZdy667r3o666oR7k8yXU.jpg" }
+        { t: "Deadpool & Wolverine", n: 8.9, i: "/o99vHmmetS7YqYp8p0mI3MD99Zp.jpg" },
+        { t: "Coringa: Delírio a Dois", n: 7.0, i: "/86pUjm9K4fW656O6D1HT6ZsiOVc.jpg" },
+        { t: "Divertida Mente 2", n: 7.8, i: "/8Y766p37fSIsS6vNcO7X9S0U7fI.jpg" },
+        { t: "Transformers: O Início", n: 7.9, i: "/m0M67XUjG69S838P0S58W3lY6pS.jpg" },
+        { t: "Alien: Romulus", n: 7.4, i: "/b33S7C7uArI2YUIvUdpS0f07nsh.jpg" },
+        { t: "É Assim Que Acaba", n: 6.9, i: "/36Y9S0U0P9pYl8vU3I1B1pYp7X6.jpg" },
+        { t: "Longlegs", n: 7.2, i: "/v7WvfS7jU8lXW9pX6oR7k8yXU.jpg" },
+        { t: "Meu Malvado Favorito 4", n: 6.8, i: "/3wS0SGBpZdy667r3o666oR7k8yXU.jpg" }
     ];
 
     const grid = document.getElementById('grid');
@@ -68,7 +69,7 @@
     function exibir(lista) {
         grid.innerHTML = lista.map(f => `
             <div class="movie-card">
-                <img src="${f.i}">
+                <img src="${imgBase + f.i}" onerror="this.src='https://via.placeholder.com/342x513?text=Filme'">
                 <div class="movie-info">
                     <div class="rating"><i class="fas fa-star"></i> ${f.n}</div>
                     <b>${f.t}</b>
@@ -77,30 +78,27 @@
         `).join('');
     }
 
-    // Busca por Texto
     input.oninput = () => {
         const termo = input.value.toLowerCase();
         const filtrados = filmes.filter(f => f.t.toLowerCase().includes(termo));
         exibir(filtrados);
     };
 
-    // MÁGICA DO MICROFONE (MILAGRE DA VOZ)
     function ouvirVoz() {
-        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        rec.lang = 'pt-BR';
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'pt-BR';
         document.getElementById('status-voz').style.display = 'block';
         
-        rec.onresult = (e) => {
+        recognition.onresult = (e) => {
             const fala = e.results[0][0].transcript;
             input.value = fala;
             input.oninput();
             document.getElementById('status-voz').style.display = 'none';
         };
-        rec.onerror = () => document.getElementById('status-voz').style.display = 'none';
-        rec.start();
+        recognition.onerror = () => document.getElementById('status-voz').style.display = 'none';
+        recognition.start();
     }
 
-    // Carregar ao abrir
     exibir(filmes);
 </script>
 
