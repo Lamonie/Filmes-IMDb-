@@ -3,92 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IMDb Lamoniê</title>
+    <title>IMDb Lamoniê PRO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 140px 15px 20px; }
+        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 140px 15px 20px; }
         header { background: #121212; padding: 15px; position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-sizing: border-box; border-bottom: 1px solid #333; }
         .logo { background: #f5c518; color: #000; font-weight: 900; padding: 5px 10px; border-radius: 4px; display: inline-block; font-size: 22px; margin-bottom: 10px; }
-        .busca { display: flex; background: #fff; border-radius: 4px; padding: 10px; align-items: center; }
-        .busca input { border: none; flex: 1; outline: none; font-size: 16px; color: #000; }
-        .busca i { color: #333; font-size: 20px; margin: 0 5px; }
+        .busca-container { display: flex; background: #fff; border-radius: 4px; padding: 10px; align-items: center; }
+        .busca-container input { border: none; flex: 1; outline: none; font-size: 16px; color: #000; width: 100%; }
+        
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .card { background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 1px solid #333; position: relative; }
-        .card img { width: 100%; height: 250px; object-fit: cover; display: block; background: #222; }
+        .card { background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .card img { width: 100%; height: 240px; object-fit: cover; display: block; background: #222; }
         .info { padding: 10px; }
-        .nota { color: #f5c518; font-weight: bold; margin-bottom: 5px; }
+        .nota { color: #f5c518; font-weight: bold; font-size: 14px; }
+        
+        /* Botão de Emergência se a tela ficar preta */
+        #btn-erro { display: block; width: 100%; padding: 15px; background: #f5c518; color: #000; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .btn-tr { display: block; background: #f5c518; color: #000; text-align: center; padding: 15px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">IMDb</div>
-    <div class="busca">
-        <i class="fas fa-search"></i>
-        <input type="text" id="in" placeholder="Digite o nome do filme...">
-        <i class="fas fa-microphone" onclick="voz()"></i>
+    <div class="busca-container">
+        <i class="fas fa-search" style="color:#333; margin-right: 10px;"></i>
+        <input type="text" id="campo" placeholder="Toque aqui para buscar...">
     </div>
 </header>
 
+<button id="btn-erro" onclick="forcar()">CLIQUE AQUI SE NÃO APARECER NADA</button>
+
 <div class="grid" id="grid"></div>
 
-<div id="mod" class="modal">
-    <span onclick="this.parentElement.style.display='none'" style="font-size: 40px; color: #f5c518; float: right;">&times;</span>
-    <img id="m-img" style="width: 100%; border-radius: 10px; margin-top: 20px;">
-    <h2 id="m-tit" style="color: #f5c518;"></h2>
-    <p id="m-sin" style="line-height: 1.5; color: #ccc;"></p>
-    <a id="m-link" target="_blank" class="btn-tr">ASSISTIR TRAILER</a>
+<div id="modal" class="modal">
+    <span onclick="this.parentElement.style.display='none'" style="font-size: 50px; color: #f5c518; position: fixed; right: 20px; top: 10px;">&times;</span>
+    <img id="m-img" style="width: 100%; border-radius: 10px; margin-top: 40px;">
+    <h1 id="m-tit" style="color: #f5c518;"></h1>
+    <p id="m-sin" style="font-size: 18px; line-height: 1.6;"></p>
+    <a id="m-yt" target="_blank" style="display:block; background:#f00; color:#fff; text-align:center; padding:15px; border-radius:8px; text-decoration:none; font-weight:bold;">VER TRAILER NO YOUTUBE</a>
 </div>
 
 <script>
-    const k = '9b8344e5482386e680cf38a8e3d30906';
+    const API_KEY = '9b8344e5482386e680cf38a8e3d30906';
 
-    async function carregar(q = '') {
-        const url = q ? `https://api.themoviedb.org/3/search/movie?api_key=${k}&language=pt-BR&query=${q}` 
-                      : `https://api.themoviedb.org/3/movie/popular?api_key=${k}&language=pt-BR`;
+    async function forcar(termo = '') {
+        const url = termo ? `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=pt-BR&query=${termo}` 
+                          : `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=pt-BR`;
         
-        const r = await fetch(url);
-        const d = await r.json();
-        
-        document.getElementById('grid').innerHTML = d.results.map(f => `
-            <div class="card" onclick="detalhes(${f.id})">
-                <img src="https://images.weserv.nl/?url=https://image.tmdb.org/t/p/w342${f.poster_path}" onerror="this.src='https://via.placeholder.com/342x513?text=Filme'">
-                <div class="info">
-                    <div class="nota">⭐ ${f.vote_average}</div>
-                    <div style="font-size:14px; font-weight:bold;">${f.title}</div>
+        try {
+            const resp = await fetch(url);
+            const dados = await resp.json();
+            const grid = document.getElementById('grid');
+            
+            grid.innerHTML = dados.results.map(f => `
+                <div class="card" onclick="verDetalhes(${f.id})">
+                    <img src="https://images.weserv.nl/?url=https://image.tmdb.org/t/p/w342${f.poster_path}" onerror="this.src='https://via.placeholder.com/342x513?text=IMDb'">
+                    <div class="info">
+                        <div class="nota">⭐ ${f.vote_average}</div>
+                        <div style="font-size:14px; margin-top:5px;">${f.title}</div>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
+            document.getElementById('btn-erro').style.display = 'none';
+        } catch (e) {
+            alert("O Safari bloqueou a conexão. Vá em Ajustes > Safari e desative 'Impedir Rastreamento entre Sites'");
+        }
     }
 
-    async function detalhes(id) {
-        const r = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${k}&language=pt-BR`);
-        const f = await r.json();
+    async function verDetalhes(id) {
+        const resp = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=pt-BR`);
+        const f = await resp.json();
         document.getElementById('m-img').src = `https://images.weserv.nl/?url=https://image.tmdb.org/t/p/w500${f.poster_path}`;
         document.getElementById('m-tit').innerText = f.title;
-        document.getElementById('m-sin').innerText = f.overview || "Sem descrição.";
-        document.getElementById('m-link').href = `https://www.youtube.com/results?search_query=trailer+${f.title}`;
-        document.getElementById('mod').style.display = 'block';
+        document.getElementById('m-sin').innerText = f.overview || "Sem descrição disponível.";
+        document.getElementById('m-yt').href = `https://www.youtube.com/results?search_query=trailer+oficial+${f.title}`;
+        document.getElementById('modal').style.display = 'block';
     }
 
-    document.getElementById('in').oninput = (e) => {
-        if(e.target.value.length > 2) carregar(e.target.value);
-        if(e.target.value == '') carregar();
-    };
+    document.getElementById('campo').addEventListener('input', (e) => {
+        if(e.target.value.length > 2) forcar(e.target.value);
+    });
 
-    function voz() {
-        const r = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        r.lang = 'pt-BR';
-        r.onresult = (e) => {
-            document.getElementById('in').value = e.results[0][0].transcript;
-            carregar(e.results[0][0].transcript);
-        };
-        r.start();
-    }
-
-    carregar();
+    // Inicia
+    forcar();
 </script>
 </body>
 </html>
