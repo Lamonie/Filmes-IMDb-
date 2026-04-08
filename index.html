@@ -1,1 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamoniê Cine | IMDb Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --imdb-yellow: #f5c518;
+            --dark-bg: #121212;
+            --card-bg: #1a1a1a;
+        }
 
+        body {
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        header {
+            background: #000;
+            padding: 15px 5%;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            color: var(--imdb-yellow);
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 2px solid var(--imdb-yellow);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Banner Principal */
+        .hero {
+            height: 50vh;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 40px 5%;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, var(--dark-bg), transparent);
+        }
+
+        .hero-content { z-index: 2; max-width: 800px; }
+        .hero-content h2 { font-size: 38px; margin: 0; }
+
+        /* Grid de Filmes */
+        .container { padding: 20px 5%; }
+        .section-title { 
+            border-left: 4px solid var(--imdb-yellow); 
+            padding-left: 10px; 
+            margin-bottom: 20px; 
+            font-size: 22px;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+        }
+
+        .movie-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .movie-card:hover { transform: translateY(-5px); }
+        .movie-card img { width: 100%; height: 240px; object-fit: cover; }
+
+        .movie-info { padding: 12px; }
+        .movie-info b { 
+            display: block; 
+            font-size: 14px; 
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Estilo da Pontuação IMDb */
+        .imdb-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .imdb-rating i { color: var(--imdb-yellow); }
+
+        @media (max-width: 600px) {
+            .movie-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Lamoniê</div>
+    <div style="font-size: 12px; color: #888;">Top Filmes Hoje</div>
+</header>
+
+<div class="hero" id="hero">
+    <div class="hero-content">
+        <div class="imdb-rating" id="hero-rating" style="margin-bottom: 10px; font-size: 18px;"></div>
+        <h2 id="hero-title">Carregando...</h2>
+    </div>
+</div>
+
+<div class="container">
+    <h3 class="section-title">Populares no IMDb</h3>
+    <div class="movie-grid" id="grid"></div>
+</div>
+
+<script>
+    const API_KEY = 'api_key=9b8344e5482386e680cf38a8e3d30906';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+    const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+    const BG_URL = 'https://image.tmdb.org/t/p/original';
+
+    async function loadMovies() {
+        const res = await fetch(`${BASE_URL}/movie/popular?${API_KEY}&language=pt-BR`);
+        const data = await res.json();
+        const movies = data.results;
+
+        // Destaque
+        const top = movies[0];
+        document.getElementById('hero').style.backgroundImage = `url(${BG_URL + top.backdrop_path})`;
+        document.getElementById('hero-title').innerText = top.title;
+        document.getElementById('hero-rating').innerHTML = `<i class="fas fa-star"></i> ${top.vote_average.toFixed(1)} <span style="color:#888; font-weight:normal; font-size:14px">/ 10</span>`;
+
+        // Grid
+        const grid = document.getElementById('grid');
+        grid.innerHTML = movies.map(m => `
+            <div class="movie-card">
+                <img src="${IMG_URL + m.poster_path}" alt="${m.title}">
+                <div class="movie-info">
+                    <div class="imdb-rating">
+                        <i class="fas fa-star"></i> ${m.vote_average.toFixed(1)}
+                    </div>
+                    <b>${m.title}</b>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    loadMovies();
+</script>
+
+</body>
+</html>
